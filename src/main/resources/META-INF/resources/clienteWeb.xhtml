@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Mis Vehículos</title>
+    <link rel="stylesheet" href="#{request.contextPath}/css/estilo.css" />
+</h:head>
+
+<f:metadata>
+    <f:viewAction action="#{vehiculoView.refresh}" />
+</f:metadata>
+
+<h:body>
+<header class="topbar">
+    <nav class="topbar-inner">
+        <a class="brand" href="index.xhtml">Taller Kinal</a>
+        <div style="margin-left:auto;">
+            <a class="card-btn" href="/taller-kinal/api/index.xhtml">Cerrar sesión</a>
+        </div>
+    </nav>
+</header>
+
+<!-- growl para mensajes -->
+<h:form id="growlForm"><p:growl id="growlMensajes" showDetail="true" life="4000" /></h:form>
+
+    <p style="font-size: 20px; background-color:black; color:white; padding:15px; text-align:center;margin: 0">
+        ¡Bienvenido, estimado cliente! Nos alegra tenerlo de vuelta en nuestro sistema. Aquí podrá consultar y gestionar la información de sus vehículos registrados de manera sencilla y segura.
+    </p>
+    <div style="text-align:center;">
+        <img src="https://senna.com/wp-content/uploads/2017/12/Hero-ext_front-3_4_dark__doors_FINAL-1.jpg-2-1.jpg" alt="Logo Kinal" style=" width:100%; height:auto;" />
+    </div>
+
+    <h1>Mis Vehículos</h1>
+    <h:form id="vehiculosForm">
+        <p:dataTable id="tabla" value="#{vehiculoView.vehiculos}" var="v" paginator="true" rows="10" rowKey="#{v.id_vehiculo}">
+            <p:column headerText="ID"><h:outputText value="#{v.id_vehiculo}"/></p:column>
+            <p:column headerText="Placas"><h:outputText value="#{v.licensePlate}"/></p:column>
+            <p:column headerText="Color"><h:outputText value="#{v.color}"/></p:column>
+            <p:column headerText="Modelo"><h:outputText value="#{v.model}"/></p:column>
+            <p:column headerText="Marca"><h:outputText value="#{v.marca}"/></p:column>
+            <p:column headerText="Año"><h:outputText value="#{v.year}"/></p:column>
+            <p:column headerText="Acciones">
+                <p:commandButton value="Agendar cita" styleClass="ui-button-primary" rendered="#{clienteView.loggedIn}"
+                                 actionListener="#{citaView.iniciarAgendarCita(v.id_vehiculo)}" update=":growlForm :vehiculosForm" oncomplete="PF('ventanaAgendarCita').show()"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+    <!-- Diálogo para agendar cita desde cliente (no accesible por URL para clientes) -->
+    <p:dialog id="dialogAgendar" widgetVar="ventanaAgendarCita" modal="true" resizable="false" header="Agendar Cita">
+        <h:form id="formAgendar">
+            <p:panelGrid columns="2" styleClass="ui-fluid" columnClasses="etq,val">
+                <p:outputLabel value="Fecha" for="fecCli" />
+                <p:calendar id="fecCli" value="#{citaView.editAppointmentDate}" pattern="yyyy-MM-dd" required="true"/>
+
+                <p:outputLabel value="Tipo de cita" for="tipoCli" />
+                <p:inputText id="tipoCli" value="#{citaView.editAppointmentType}" required="true" placeholder="Ej: Mantenimiento"/>
+
+                <p:outputLabel value="Comentario" for="comCli" />
+                <p:inputTextarea id="comCli" value="#{citaView.editComments}" autoResize="true" rows="4" required="true"/>
+            </p:panelGrid>
+            <p:separator/>
+            <p:commandButton value="Guardar" icon="pi pi-save" styleClass="ui-button-success"
+                             actionListener="#{citaView.guardarCitaDesdeCliente}"
+                             update=":growlForm :vehiculosForm" oncomplete="PF('ventanaAgendarCita').hide()"/>
+            <p:commandButton value="Cancelar" icon="pi pi-times" type="button" onclick="PF('ventanaAgendarCita').hide()"/>
+        </h:form>
+    </p:dialog>
+
+</h:body>
+</html>

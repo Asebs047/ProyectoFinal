@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Vehículos</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+
+<f:metadata>
+    <f:viewAction action="#{vehiculoView.refresh}" />
+</f:metadata>
+
+<h:body>
+    <h:form id="growlForm"><p:growl id="growlMensajes" showDetail="true" life="3000"/></h:form>
+    <h:form id="toolbarVehiculos">
+        <p:toolbar>
+            <p:toolbarGroup>
+                <p:commandButton value="Nuevo" icon="pi pi-plus" actionListener="#{vehiculoView.agregarVehiculo}" update=":dialogVehiculoForm"/>
+            </p:toolbarGroup>
+            <p:toolbarGroup align="right">
+                <p:commandButton value="Refrescar" icon="pi pi-refresh" actionListener="#{vehiculoView.refresh}" update=":vehiculosForm:tablaVehiculos"/>
+                <p:commandButton value="Inicio" icon="pi pi-home" type="button" onclick="window.location='#{request.contextPath}/AdministradorWeb.html'"/>
+            </p:toolbarGroup>
+        </p:toolbar>
+    </h:form>
+
+    <h:form id="vehiculosForm">
+        <p:dataTable id="tablaVehiculos" value="#{vehiculoView.vehiculos}" var="v" paginator="true" rows="10"
+                     rowKey="#{v.idVehiculo}" emptyMessage="No hay vehículos" responsiveLayout="scroll" stripedRows="true" rowHover="true">
+            <p:column headerText="ID" style="width:60px"><h:outputText value="#{v.idVehiculo}"/></p:column>
+            <p:column headerText="Cliente" sortBy="#{v.idCliente}"><h:outputText value="#{v.idCliente}"/></p:column>
+            <p:column headerText="Placas" sortBy="#{v.licensePlate}" filterBy="#{v.licensePlate}" filterMatchMode="contains"><h:outputText value="#{v.licensePlate}"/></p:column>
+            <p:column headerText="Color"><h:outputText value="#{v.color}"/></p:column>
+            <p:column headerText="Modelo"><h:outputText value="#{v.model}"/></p:column>
+            <p:column headerText="Marca"><h:outputText value="#{v.marca}"/></p:column>
+            <p:column headerText="Año"><h:outputText value="#{v.year}"/></p:column>
+            <p:column headerText="Acciones" style="width:160px">
+                <p:commandButton icon="pi pi-pencil" title="Editar" styleClass="ui-button-info" actionListener="#{vehiculoView.prepararEdicionVehiculo(v)}" update=":dialogVehiculoForm"/>
+                <p:commandButton icon="pi pi-trash" title="Eliminar" styleClass="ui-button-danger" actionListener="#{vehiculoView.prepararEdicionVehiculo(v)}" oncomplete="PF('confirmEliminarVehiculo').show()" update=":confirmEliminarVehiculoForm"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+    <p:dialog id="dialogVehiculo" widgetVar="ventanaModalVehiculo" modal="true" resizable="false" header="#{vehiculoView.selected == null ? 'Nuevo Vehículo' : 'Editar Vehículo'}">
+        <h:form id="dialogVehiculoForm">
+            <p:panelGrid columns="2" styleClass="ui-fluid" columnClasses="etq,val">
+                <p:outputLabel value="ID Cliente" for="cli"/>
+                <p:inputText id="cli" value="#{vehiculoView.editIdCliente}" required="true"/>
+                <p:outputLabel value="Placas" for="plac"/>
+                <p:inputText id="plac" value="#{vehiculoView.editPlacas}" required="true" disabled="#{not empty vehiculoView.selected}"/>
+                <p:outputLabel value="Color" for="col"/>
+                <p:inputText id="col" value="#{vehiculoView.editColor}"/>
+                <p:outputLabel value="Modelo" for="mod"/>
+                <p:inputText id="mod" value="#{vehiculoView.editModelo}"/>
+                <p:outputLabel value="Marca" for="mar"/>
+                <p:selectOneMenu id="mar" value="#{vehiculoView.editMarca}" required="true" placeholder="Seleccione">
+                    <f:selectItem itemLabel="Seleccione" itemValue="" noSelectionOption="true"/>
+                    <f:selectItems value="#{vehiculoView.listaMarcas}" var="m" itemLabel="#{m}" itemValue="#{m}"/>
+                </p:selectOneMenu>
+                <p:outputLabel value="Año" for="ano"/>
+                <p:inputText id="ano" value="#{vehiculoView.editAno}"/>
+            </p:panelGrid>
+            <p:separator/>
+            <p:commandButton value="Guardar" icon="pi pi-save" styleClass="ui-button-success" actionListener="#{vehiculoView.guardarVehiculo}" update=":growlForm:growlMensajes :vehiculosForm:tablaVehiculos"/>
+            <p:commandButton value="Cancelar" icon="pi pi-times" type="button" onclick="PF('ventanaModalVehiculo').hide()"/>
+        </h:form>
+    </p:dialog>
+
+    <p:dialog id="confirmEliminarVehiculo" widgetVar="confirmEliminarVehiculo" modal="true" resizable="false" closable="false" header="Confirmar">
+        <h:form id="confirmEliminarVehiculoForm">
+            <h:panelGroup rendered="#{not empty vehiculoView.selected}"><h:outputText value="¿Eliminar vehículo '#{vehiculoView.selected.licensePlate}'?"/></h:panelGroup>
+            <p:separator/>
+            <p:commandButton value="Sí" icon="pi pi-check" styleClass="ui-button-danger" actionListener="#{vehiculoView.eliminarVehiculo(vehiculoView.selected)}" update=":growlForm:growlMensajes :vehiculosForm:tablaVehiculos" oncomplete="PF('confirmEliminarVehiculo').hide()"/>
+            <p:commandButton value="No" icon="pi pi-times" type="button" onclick="PF('confirmEliminarVehiculo').hide()"/>
+        </h:form>
+    </p:dialog>
+</h:body>
+</html>

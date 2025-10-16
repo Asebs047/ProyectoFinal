@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Proveedores</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body>
+
+    <!-- Mensajes globales -->
+    <h:form id="growlForm">
+        <p:growl id="growlMensajes" showDetail="true" life="3000"/>
+    </h:form>
+
+    <!-- Menú / Acciones -->
+    <h:form id="accionesForm">
+        <p:toolbar>
+            <p:toolbarGroup>
+                <p:commandButton value="Nuevo Proveedor" icon="pi pi-plus"
+                                 actionListener="#{proveedorView.agregarProveedor}"
+                                 update=":dialogProveedorForm"/>
+            </p:toolbarGroup>
+            <p:toolbarGroup align="right">
+                <p:commandButton value="Refrescar" icon="pi pi-refresh"
+                                 actionListener="#{proveedorView.refresh}"
+                                 update=":formProveedores:tablaProveedores"/>
+                <p:commandButton value="Inicio" icon="pi pi-home" type="button" onclick="window.location='#{request.contextPath}/AdministradorWeb.html'"/>
+
+            </p:toolbarGroup>
+        </p:toolbar>
+    </h:form>
+
+    <!-- Tabla de proveedores -->
+    <h:form id="formProveedores">
+        <p:dataTable id="tablaProveedores"
+                     value="#{proveedorView.proveedores}"
+                     var="pvd"
+                     paginator="true" rows="10"
+                     rowKey="#{pvd.id_proveedor}"
+                     emptyMessage="No hay proveedores"
+                     responsiveLayout="scroll"
+                     stripedRows="true"
+                     rowHover="true"
+                     resizableColumns="true">
+            <p:column headerText="ID" sortBy="#{pvd.id_proveedor}" style="width:80px">
+                <h:outputText value="#{pvd.id_proveedor}"/>
+            </p:column>
+            <p:column headerText="Empresa" sortBy="#{pvd.companyName}" filterBy="#{pvd.companyName}" filterMatchMode="contains">
+                <h:outputText value="#{pvd.companyName}"/>
+            </p:column>
+            <p:column headerText="Contacto" sortBy="#{pvd.contact}" filterBy="#{pvd.contact}" filterMatchMode="contains">
+                <h:outputText value="#{pvd.contact}"/>
+            </p:column>
+            <p:column headerText="Teléfono" sortBy="#{pvd.phone}" filterBy="#{pvd.phone}" filterMatchMode="contains">
+                <h:outputText value="#{pvd.phone}"/>
+            </p:column>
+            <p:column headerText="Email" sortBy="#{pvd.email}" filterBy="#{pvd.email}" filterMatchMode="contains">
+                <h:outputText value="#{pvd.email}"/>
+            </p:column>
+            <p:column headerText="Acciones" style="width:220px">
+                <p:commandButton icon="pi pi-pencil" title="Editar" styleClass="ui-button-info"
+                                 actionListener="#{proveedorView.prepararEdicion(pvd)}"
+                                 update=":dialogProveedorForm"/>
+                <p:spacer width="6"/>
+                <p:commandButton icon="pi pi-trash" title="Eliminar" styleClass="ui-button-danger"
+                                 oncomplete="if(!args.validationFailed) PF('confirmEliminarProveedor').show()"
+                                 process="@this"
+                                 update=":confirmEliminarForm"
+                                 actionListener="#{proveedorView.prepararEdicion(pvd)}"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+    <!-- Diálogo Crear / Editar -->
+    <p:dialog id="dialogProveedor" widgetVar="ventanaModalProveedor" modal="true" resizable="false" draggable="false" closable="true"
+              header="#{proveedorView.proveedorSeleccionado == null or proveedorView.proveedorSeleccionado.id_proveedor == null ? 'Nuevo Proveedor' : 'Editar Proveedor'}">
+        <h:form id="dialogProveedorForm">
+            <p:panelGrid columns="2" styleClass="ui-fluid" columnClasses="etq,val">
+                <p:outputLabel value="Empresa" for="emp"/>
+                <p:inputText id="emp" value="#{proveedorView.editCompanyName}" required="true" label="Empresa"/>
+
+                <p:outputLabel value="Contacto" for="cont"/>
+                <p:inputText id="cont" value="#{proveedorView.editContact}" required="true" label="Contacto"/>
+
+                <p:outputLabel value="Teléfono" for="tel"/>
+                <p:inputText id="tel" value="#{proveedorView.editPhone}" required="true" label="Teléfono"/>
+
+                <p:outputLabel value="Email" for="mail"/>
+                <p:inputText id="mail" value="#{proveedorView.editEmail}" required="true" label="Email"/>
+            </p:panelGrid>
+            <p:separator/>
+            <p:commandButton value="Guardar" icon="pi pi-save" styleClass="ui-button-success"
+                             actionListener="#{proveedorView.guardarProveedor}"
+                             update=":growlForm:growlMensajes :formProveedores:tablaProveedores"/>
+            <p:commandButton value="Cancelar" icon="pi pi-times" type="button"
+                             onclick="PF('ventanaModalProveedor').hide()"/>
+        </h:form>
+    </p:dialog>
+
+    <!-- Confirmación eliminar -->
+    <p:dialog id="confirmEliminar" widgetVar="confirmEliminarProveedor" modal="true" resizable="false" closable="false" header="Confirmar Eliminación">
+        <h:form id="confirmEliminarForm">
+            <h:panelGroup rendered="#{not empty proveedorView.proveedorSeleccionado}">
+                <h:outputText value="¿Eliminar proveedor '#{proveedorView.proveedorSeleccionado.companyName}'?"/>
+            </h:panelGroup>
+            <p:separator/>
+            <p:commandButton value="Sí" icon="pi pi-check" styleClass="ui-button-danger"
+                             actionListener="#{proveedorView.eliminarProveedor}"
+                             update=":growlForm:growlMensajes :formProveedores:tablaProveedores"
+                             oncomplete="PF('confirmEliminarProveedor').hide()"/>
+            <p:commandButton value="No" icon="pi pi-times" type="button"
+                             onclick="PF('confirmEliminarProveedor').hide()"/>
+        </h:form>
+    </p:dialog>
+
+</h:body>
+</html>
