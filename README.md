@@ -83,12 +83,8 @@ localhost:8083/taller-kinal/api
 | DetalleUsoProducto     | `/v1/detalleusoproductos`         | `GET`, `POST`, `PUT`, `DELETE`   |
 | Reportes               | `/v1/reportes`                    | `GET`, `POST`, `PUT`, `DELETE`   |
 
-
-## Integrantes del Proyecto
-
-- **Byron Pineda**
-- **Emiliano Herrera**
-- **Marcos Cruz**
+ **Emiliano Herrera**
+2024047
 
 ## Notas
 - Asegúrate de que el usuario esté correctamente escrito para que corra en application.properties.
