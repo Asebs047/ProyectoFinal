@@ -31,6 +31,20 @@
     </h:form>
 
     <h:form id="citasForm">
+        <!-- Panel: citas pendientes del día -->
+        <p:panel header="Citas pendientes hoy" style="margin-bottom:10px">
+            <p:dataTable id="pendientesTabla" value="#{citaView.pendientesHoy}" var="ph" emptyMessage="No hay citas pendientes hoy" paginator="true" rows="5" stripedRows="true">
+                <p:column headerText="ID" style="width:60px"><h:outputText value="#{ph.id_cita}"/></p:column>
+                <p:column headerText="Fecha"><h:outputText value="#{ph.appointmentDate}"/></p:column>
+                <p:column headerText="Mecánico"><h:outputText value="#{ph.idEmpleado}"/></p:column>
+                <p:column headerText="Cliente"><h:outputText value="#{ph.idCliente}"/></p:column>
+                <p:column headerText="Tipo"><h:outputText value="#{ph.appointmentType}"/></p:column>
+                <p:column headerText="Vehículo"><h:outputText value="#{ph.idVehiculo}"/></p:column>
+                <p:column headerText="Estado"><h:outputText value="#{ph.status}"/></p:column>
+            </p:dataTable>
+            <p:commandButton value="Refrescar pendientes" icon="pi pi-refresh" actionListener="#{citaView.refreshHoy}" update=":citasForm:pendientesTabla :growlForm:growlMensajes" style="margin-top:8px" />
+        </p:panel>
+
         <p:dataTable id="tabla" value="#{citaView.citas}" var="c" paginator="true" rows="10" rowKey="#{c.id_cita}" emptyMessage="No hay citas" stripedRows="true" rowHover="true">
             <p:column headerText="ID" style="width:60px"><h:outputText value="#{c.id_cita}"/></p:column>
             <p:column headerText="Fecha"><h:outputText value="#{c.appointmentDate}"/></p:column>

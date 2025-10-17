@@ -12,6 +12,8 @@ import org.Algorix.TallerKinal.web.mapper.ReporteMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Repository
 public class ResporteEntityRepository implements ResporteRepository {
@@ -76,5 +78,10 @@ public class ResporteEntityRepository implements ResporteRepository {
     } else {
         this.crudReporte.deleteById(id);
         }
+    }
+
+    @Override
+    public BigDecimal sumarTotalEntreFechas(LocalDate start, LocalDate end) {
+        return this.crudReporte.sumTotalByFechaCitaBetween(start, end);
     }
 }

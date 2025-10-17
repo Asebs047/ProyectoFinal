@@ -6,6 +6,8 @@ import org.Algorix.TallerKinal.dominio.repository.ResporteRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Service
 public class ReporteService {
@@ -37,4 +39,9 @@ public class ReporteService {
         this.reporteRepository.eliminarReporte(codigo);
     }
     
+    // Obtener suma de totales entre dos fechas (inclusive)
+    public BigDecimal obtenerTotalEntre(LocalDate start, LocalDate end) {
+        return this.reporteRepository.sumarTotalEntreFechas(start, end);
+    }
+
 }

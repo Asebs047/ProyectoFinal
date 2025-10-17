@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Ingresos - Taller Kinal</title>
+    <h:outputStylesheet library="css" name="app.css"/>
+</h:head>
+<h:body>
+    <h:form id="ingresosForm">
+        <p:growl id="msgs" showDetail="true" life="4000" />
+
+        <p:panelGrid columns="2" style="margin-bottom:10px">
+            <p:panel header="Total Semana">
+                <h:outputText value="#{ingresosView.totalSemana}">
+                    <f:convertNumber type="currency"/>
+                </h:outputText>
+            </p:panel>
+            <p:panel header="Total Mes">
+                <h:outputText value="#{ingresosView.totalMes}">
+                    <f:convertNumber type="currency"/>
+                </h:outputText>
+            </p:panel>
+        </p:panelGrid>
+
+        <p:panel header="Calcular ingresos por rango">
+            <p:panelGrid columns="2" columnClasses="etq,val" styleClass="ui-fluid">
+                <p:outputLabel value="Fecha inicio" for="start" />
+                <p:calendar id="start" value="#{ingresosView.startDate}" pattern="yyyy-MM-dd" />
+
+                <p:outputLabel value="Fecha fin" for="end" />
+                <p:calendar id="end" value="#{ingresosView.endDate}" pattern="yyyy-MM-dd" />
+
+                <p:outputLabel />
+                <p:commandButton value="Calcular" icon="pi pi-search" actionListener="#{ingresosView.computeRange}" update=":ingresosForm:rangeTotalPanel :ingresosForm:msgs"/>
+            </p:panelGrid>
+
+            <p:separator />
+            <p:panel id="rangeTotalPanel" header="Total en rango">
+                <h:outputText value="#{ingresosView.totalRange != null ? ingresosView.totalRange : 0}">
+                    <f:convertNumber type="currency"/>
+                </h:outputText>
+            </p:panel>
+        </p:panel>
+
+        <p:commandButton value="Refrescar totales" icon="pi pi-refresh" actionListener="#{ingresosView.refreshTotals}" update=":ingresosForm:msgs :ingresosForm" style="margin-top:10px"/>
+        <p:commandButton value="Volver" icon="pi pi-arrow-left" type="button" onclick="window.location='#{request.contextPath}/AdministradorWeb.html'" style="margin-top:10px"/>
+    </h:form>
+</h:body>
+</html>

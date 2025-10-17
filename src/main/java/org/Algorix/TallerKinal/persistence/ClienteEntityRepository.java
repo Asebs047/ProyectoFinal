@@ -1,7 +1,6 @@
 package org.Algorix.TallerKinal.persistence;
 
 import org.Algorix.TallerKinal.dominio.dto.ClienteDto;
-import org.Algorix.TallerKinal.dominio.dto.ModClienteDto;
 import org.Algorix.TallerKinal.dominio.dto.UserClienteDto;
 import org.Algorix.TallerKinal.dominio.exception.ClienteNoExiste;
 import org.Algorix.TallerKinal.dominio.exception.ContrasenaInvalida;
@@ -43,7 +42,7 @@ public class ClienteEntityRepository implements ClienteRepository {
 
     @Override
     public ClienteDto guardarCliente(ClienteDto clienteDto) {
-        if (this.crudCliente.findFirstByCorreo(clienteDto.getEmail()) != null) {
+        if (this.crudCliente.findFirstByCorreoIgnoreCase(clienteDto.getEmail()) != null) {
             throw new CorreoDuplicado(clienteDto.getEmail());
         }
         ClienteEntity cliente = this.clienteMapper.toEntity(clienteDto);
@@ -76,7 +75,7 @@ public class ClienteEntityRepository implements ClienteRepository {
         if (userClienteDto.password() == null || userClienteDto.password().isBlank()) {
             throw new ContrasenaInvalida(userClienteDto.password());
         }
-        ClienteEntity clienteEntity = this.crudCliente.findFirstByCorreo(userClienteDto.email());
+        ClienteEntity clienteEntity = this.crudCliente.findFirstByCorreoIgnoreCase(userClienteDto.email());
         if (clienteEntity == null) {
             throw new ClienteNoExiste(null);
         }

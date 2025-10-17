@@ -18,6 +18,9 @@ public class CitaService {
     public List<CitaDto> obtenerTodo() {
         return this.citaRepository.obtenerTodo();
     }
+    public List<CitaDto> obtenerPorFechaYEstado(java.time.LocalDate fecha, String estado) {
+        return this.citaRepository.obtenerPorFechaYEstado(fecha, estado);
+    }
     public CitaDto obtenerTodoPorId(Long id) {
         return this.citaRepository.buscarPorId(id);
     }

@@ -9,6 +9,7 @@ import org.Algorix.TallerKinal.persistence.entity.CitaEntity;
 import org.Algorix.TallerKinal.web.mapper.CitaMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -60,5 +61,11 @@ public class CitaEntityRepository implements CitaRepository {
             throw new CitaNoExiste(id);
         }
         this.crudCita.deleteById(id);
+    }
+
+    @Override
+    public List<CitaDto> obtenerPorFechaYEstado(LocalDate fecha, String estado) {
+        var entities = this.crudCita.findByFechaCitaAndEstadoCitaIgnoreCase(fecha, estado);
+        return this.citaMapper.toDto(entities);
     }
 }

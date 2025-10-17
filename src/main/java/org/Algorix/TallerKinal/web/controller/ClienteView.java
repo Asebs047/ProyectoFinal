@@ -77,7 +77,9 @@ public class ClienteView implements Serializable {
         FacesContext ctx = FacesContext.getCurrentInstance();
         // Intentar admin primero
         try {
-            UserAdminDto admin = new UserAdminDto(loginEmail, loginPassword);
+            String email = loginEmail == null ? null : loginEmail.trim().toLowerCase();
+            String pass = loginPassword == null ? null : loginPassword.trim();
+            UserAdminDto admin = new UserAdminDto(email, pass);
             var adminDto = administradorService.iniciarSesion(admin);
             if (adminDto != null) {
                 ctx.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO, "Inicio de sesión", "Administrador autenticado."));
@@ -90,7 +92,9 @@ public class ClienteView implements Serializable {
         }
         // Intentar cliente
         try {
-            UserClienteDto user = new UserClienteDto(loginEmail, loginPassword);
+            String email = loginEmail == null ? null : loginEmail.trim().toLowerCase();
+            String pass = loginPassword == null ? null : loginPassword.trim();
+            UserClienteDto user = new UserClienteDto(email, pass);
             var clienteDto = clienteService.iniciarSesion(user);
             if (clienteDto != null) {
                 this.currentCliente = clienteDto; this.loggedIn = true;
@@ -109,7 +113,18 @@ public class ClienteView implements Serializable {
     }
     private void redirect(String page) {
         try {
-            FacesContext.getCurrentInstance().getExternalContext().redirect(page);
+            var fc = FacesContext.getCurrentInstance();
+            var ec = fc.getExternalContext();
+            String target;
+            if (page == null) {
+                target = ec.getRequestContextPath() + "/";
+            } else if (page.startsWith("http://") || page.startsWith("https://")) {
+                target = page;
+            } else {
+                // normalizar: si page comienza con '/', no agregar otra '/'
+                target = ec.getRequestContextPath() + (page.startsWith("/") ? "" : "/") + page;
+            }
+            ec.redirect(target);
         } catch (IOException e) {
             FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "No se pudo redirigir a " + page));
         }

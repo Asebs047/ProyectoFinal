@@ -34,6 +34,8 @@ public class CitaView implements Serializable {
     private final VehiculoService vehiculoService;
     private List<CitaDto> citas;
     private CitaDto selected;
+    // Citas pendientes del día (para vista cliente/administrador)
+    private List<CitaDto> pendientesHoy;
 
     // listas para selects en UI (admin)
     private List<MecanicoDto> mecanicos;
@@ -64,6 +66,7 @@ public class CitaView implements Serializable {
     @PostConstruct
     public void init() {
         refresh();
+        refreshHoy();
         clearEdits();
     }
 
@@ -76,6 +79,16 @@ public class CitaView implements Serializable {
             try { this.vehiculos = vehiculoService.obtenerTodo(); } catch (Exception e) { this.vehiculos = new ArrayList<>(); }
         } catch (Exception e) {
             this.citas = new ArrayList<>();
+        }
+    }
+
+    /** Refresca la lista de citas pendientes para hoy (estado PENDIENTE). */
+    public void refreshHoy() {
+        try {
+            var today = java.time.LocalDate.now();
+            this.pendientesHoy = new ArrayList<>(citaService.obtenerPorFechaYEstado(today, "PENDIENTE"));
+        } catch (Exception e) {
+            this.pendientesHoy = new ArrayList<>();
         }
     }
 
@@ -234,6 +247,7 @@ public class CitaView implements Serializable {
                 FacesContext.getCurrentInstance().addMessage(null, new FacesMessage("Cita Modificada"));
             }
             refresh();
+            refreshHoy();
             PrimeFaces.current().ajax().update("citasForm:tabla", "growlForm:growlMensajes");
             PrimeFaces.current().executeScript("PF('ventanaModalCita').hide()");
             this.selected = null;
@@ -243,10 +257,22 @@ public class CitaView implements Serializable {
         }
     }
 
+    public void eliminarCita(){ if(this.selected==null || this.selected.id_cita()==null) return; try { citaService.eliminarCita(this.selected.id_cita()); FacesContext.getCurrentInstance().addMessage(null,new FacesMessage("Cita Eliminada")); refresh(); PrimeFaces.current().ajax().update("citasForm:tabla", "growlForm:growlMensajes"); this.selected=null; clearEdits(); } catch(Exception e){ FacesContext.getCurrentInstance().addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR,"Error","No se pudo eliminar")); } }
 
-   public void eliminarCita(){ if(this.selected==null || this.selected.id_cita()==null) return; try { citaService.eliminarCita(this.selected.id_cita()); FacesContext.getCurrentInstance().addMessage(null,new FacesMessage("Cita Eliminada")); refresh(); PrimeFaces.current().ajax().update("citasForm:tabla", "growlForm:growlMensajes"); this.selected=null; clearEdits(); } catch(Exception e){ FacesContext.getCurrentInstance().addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR,"Error","No se pudo eliminar")); } }
+    // Al eliminar también actualizar pendientes de hoy
+    public void eliminarCitaYRefrescar(){
+        if(this.selected==null || this.selected.id_cita()==null) return;
+        try {
+            citaService.eliminarCita(this.selected.id_cita());
+            FacesContext.getCurrentInstance().addMessage(null,new FacesMessage("Cita Eliminada"));
+            refresh();
+            refreshHoy();
+            PrimeFaces.current().ajax().update("citasForm:tabla", "growlForm:growlMensajes");
+            this.selected=null; clearEdits();
+        } catch(Exception e){ FacesContext.getCurrentInstance().addMessage(null,new FacesMessage(FacesMessage.SEVERITY_ERROR,"Error","No se pudo eliminar")); }
+    }
 
-   public void cancelarCita(){ this.selected=null; clearEdits(); PrimeFaces.current().executeScript("PF('ventanaModalCita').hide()"); }
+    public void cancelarCita(){ this.selected=null; clearEdits(); PrimeFaces.current().executeScript("PF('ventanaModalCita').hide()"); }
 
     // Evita que clientes accedan a la página de gestión de citas (solo admin)
     public void asegurarAccesoAdministrador() {
@@ -262,7 +288,17 @@ public class CitaView implements Serializable {
 
     private void redirectLocal(String page) {
         try {
-            FacesContext.getCurrentInstance().getExternalContext().redirect(page);
+            var fc = FacesContext.getCurrentInstance();
+            var ec = fc.getExternalContext();
+            String target;
+            if (page == null) {
+                target = ec.getRequestContextPath() + "/";
+            } else if (page.startsWith("http://") || page.startsWith("https://")) {
+                target = page;
+            } else {
+                target = ec.getRequestContextPath() + (page.startsWith("/") ? "" : "/") + page;
+            }
+            ec.redirect(target);
         } catch (IOException e) {
             // ignorar
         }

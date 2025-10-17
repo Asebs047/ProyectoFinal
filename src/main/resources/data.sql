@@ -142,3 +142,45 @@ FROM (
   UNION ALL SELECT 5,'Reporte cita 5',460.00
 ) AS t
 WHERE NOT EXISTS (SELECT 1 FROM reportes LIMIT 1);
+
+-- Datos recientes para pruebas de ingresos (fecha actual aproximada 2025-10)
+INSERT INTO citas( fecha_cita, id_empleado, id_cliente, tipo_cita, id_vehiculo, estado_cita, comentario)
+SELECT t.fecha_cita, t.id_empleado, t.id_cliente, t.tipo_cita, t.id_vehiculo, t.estado_cita, t.comentario
+FROM (
+  SELECT '2025-10-14' AS fecha_cita, 1 AS id_empleado, 1 AS id_cliente, 'mantenimiento' AS tipo_cita, 1 AS id_vehiculo, 'pendiente' AS estado_cita, 'Cita semana' AS comentario
+  UNION ALL SELECT '2025-10-16',2,2,'reparación',2,'finalizada','Cita hoy'
+  UNION ALL SELECT '2025-10-10',3,3,'diagnóstico',3,'finalizada','Cita inicio mes'
+) AS t
+WHERE NOT EXISTS (SELECT 1 FROM citas c WHERE c.fecha_cita = t.fecha_cita AND c.id_cliente = t.id_cliente LIMIT 1);
+
+-- Insertar reportes asociados a las citas recientes (usa el id de la cita recién creada)
+INSERT INTO reportes( id_cita, descripcion_general, total)
+SELECT c.id_cita, 'Reporte prueba semana', 150.00
+FROM citas c
+WHERE c.fecha_cita = '2025-10-14' AND c.id_cliente = 1
+  AND NOT EXISTS (SELECT 1 FROM reportes r WHERE r.id_cita = c.id_cita LIMIT 1);
+
+INSERT INTO reportes( id_cita, descripcion_general, total)
+SELECT c.id_cita, 'Reporte prueba hoy', 320.00
+FROM citas c
+WHERE c.fecha_cita = '2025-10-16' AND c.id_cliente = 2
+  AND NOT EXISTS (SELECT 1 FROM reportes r WHERE r.id_cita = c.id_cita LIMIT 1);
+
+INSERT INTO reportes( id_cita, descripcion_general, total)
+SELECT c.id_cita, 'Reporte prueba mes', 80.00
+FROM citas c
+WHERE c.fecha_cita = '2025-10-10' AND c.id_cliente = 3
+  AND NOT EXISTS (SELECT 1 FROM reportes r WHERE r.id_cita = c.id_cita LIMIT 1);
+
+-- Opcional: agregar trabajos_realizados vinculados a las nuevas citas para mantener consistencia
+INSERT INTO trabajos_realizados( id_cita, descripcion, mano_obra, total_trabajo)
+SELECT c.id_cita, 'Trabajo demo', 40.00, 190.00
+FROM citas c
+WHERE c.fecha_cita = '2025-10-14' AND c.id_cliente = 1
+  AND NOT EXISTS (SELECT 1 FROM trabajos_realizados t WHERE t.id_cita = c.id_cita LIMIT 1);
+
+INSERT INTO trabajos_realizados( id_cita, descripcion, mano_obra, total_trabajo)
+SELECT c.id_cita, 'Trabajo demo 2', 70.00, 390.00
+FROM citas c
+WHERE c.fecha_cita = '2025-10-16' AND c.id_cliente = 2
+  AND NOT EXISTS (SELECT 1 FROM trabajos_realizados t WHERE t.id_cita = c.id_cita LIMIT 1);

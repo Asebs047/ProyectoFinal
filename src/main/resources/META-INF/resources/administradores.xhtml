@@ -9,6 +9,30 @@
 </h:head>
 <h:body>
     <h:form id="growlForm"><p:growl id="growlMensajes" showDetail="true" life="3000"/></h:form>
+
+    <!-- Dashboard: pendientes hoy y enlace a ingresos -->
+    <h:form id="dashboardForm">
+        <p:panelGrid columns="2" styleClass="ui-panelgrid-headers">
+            <p:panel header="Pendientes Hoy">
+                <h:outputText value="#{administradorView.pendientesHoy != null ? administradorView.pendientesHoy.size() : 0}" />
+            </p:panel>
+            <p:panel header="Ingresos">
+                <p:commandButton value="Ver Ingresos" icon="pi pi-chart-line" type="button" onclick="window.location='#{request.contextPath}/ingresos.xhtml'" />
+            </p:panel>
+        </p:panelGrid>
+
+        <p:panel header="Citas pendientes hoy" style="margin-top:10px">
+            <p:dataTable id="tablaPendientes" value="#{administradorView.pendientesHoy}" var="c" paginator="true" rows="10" emptyMessage="No hay citas pendientes hoy">
+                <p:column headerText="ID"><h:outputText value="#{c.id_cita}"/></p:column>
+                <p:column headerText="Fecha"><h:outputText value="#{c.appointmentDate}"/></p:column>
+                <p:column headerText="Tipo"><h:outputText value="#{c.appointmentType}"/></p:column>
+                <p:column headerText="Cliente"><h:outputText value="#{c.idCliente}"/></p:column>
+                <p:column headerText="Vehículo"><h:outputText value="#{c.idVehiculo}"/></p:column>
+                <p:column headerText="Comentario"><h:outputText value="#{c.comments}"/></p:column>
+            </p:dataTable>
+        </p:panel>
+    </h:form>
+
     <h:form id="toolbarAdministradores">
         <p:toolbar>
             <p:toolbarGroup>
